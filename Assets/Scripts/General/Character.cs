@@ -15,14 +15,20 @@ public class Character : MonoBehaviour
     private double invulnerableCounter;
     public bool invulnerable;
 
-    // Unity.Event
-
+    #region Unity.Event
+    [Header("持久化订阅")]
+    public UnityEvent<Character> OnHealthChange;
     public UnityEvent<Transform> OnTakeDamage;
     public UnityEvent OnDie;
+
+    #endregion
 
     private void Start()
     {
         currentHealth = maxHealth;
+
+        // while Game Start: 自动填充PlayerStatBar
+        OnHealthChange?.Invoke(this);
     }
 
     public void Update()
@@ -59,6 +65,9 @@ public class Character : MonoBehaviour
             currentHealth = 0;
             OnDie?.Invoke();
         }
+
+        // send 血量变化数值
+        OnHealthChange?.Invoke(this);
         
     }
 
