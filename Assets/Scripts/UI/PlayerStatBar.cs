@@ -1,21 +1,30 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.Video;
 
 public class PlayerStatBar : MonoBehaviour
 {
+    private Character currentCharacter;    
     public Image healthImage;
     public Image healthDelayImage;
     public Image powerImage;
 
-    
+    public bool isRecovering;
     private void Update()
     {
         // Set Delay fill effect
         if (healthDelayImage.fillAmount > healthImage.fillAmount)
         {
             healthDelayImage.fillAmount -= Time.deltaTime;
+        }
+
+        if(isRecovering )
+        {
+            double percentage = currentCharacter.currentPower / currentCharacter.maxPower;
+            powerImage.fillAmount = (float)percentage;
         }
     }
 
@@ -27,5 +36,11 @@ public class PlayerStatBar : MonoBehaviour
     public void OnHealthChange(float percentage)
     {
         healthImage.fillAmount = percentage;
+    }
+
+    public void OnPowerChange(Character character)
+    {
+        isRecovering = true;
+        currentCharacter = character;
     }
 }

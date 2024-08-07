@@ -7,10 +7,14 @@ using UnityEngine;
 public class PhysicsCheck : MonoBehaviour
 {
     private CapsuleCollider2D coll;
+    private PlayerController playerController;
+    private Rigidbody2D rb;
 
     [Header("检测参数")]
     //To determine is checkField set manually 
     public bool manual;
+    public bool isPlayer;
+
     public LayerMask groundLayer;
     public float checkRadius;
 
@@ -23,10 +27,13 @@ public class PhysicsCheck : MonoBehaviour
     public bool isGround;
     public bool touchLeftWall;
     public bool touchRightWall;
+    public bool onWall;
 
     private void Awake()
     {
         coll = GetComponent<CapsuleCollider2D>();
+        rb = GetComponent<Rigidbody2D>();
+
 
         // auto set collcheck
         if (!manual)
@@ -38,6 +45,12 @@ public class PhysicsCheck : MonoBehaviour
             rightOffset = new Vector2((coll.bounds.size.x / 2 + coll.offset.x), coll.offset.y);
         }
 
+        // get PlayerController when isPlayer
+        if(isPlayer)
+        {
+            playerController = GetComponent<PlayerController>();
+        }
+
     }
 
     private void Update()
@@ -47,17 +60,25 @@ public class PhysicsCheck : MonoBehaviour
 
     public void Check()
     {
-        // check ifIsGround to control ifJump
+        // check ifIsGround:用于控制与地面检测相关内容的关键变量
+        // 跑动时 / 位于墙体 检测
+        if(onWall)
         isGround = Physics2D.OverlapCircle((Vector2)transform.position + new Vector2(bottomOffset.x * transform.localScale.x, bottomOffset.y), checkRadius, groundLayer);
-
+        else
+        isGround = Physics2D.OverlapCircle((Vector2)transform.position + new Vector2(bottomOffset.x * transform.localScale.x, 0), checkRadius, groundLayer);
+        //  
         
         // To solve Offset wrong
         leftOffset = new Vector2(-(coll.bounds.size.x / 2 - coll.offset.x * transform.localScale.x), rightOffset.y);
         rightOffset = new Vector2((coll.bounds.size.x / 2 + coll.offset.x * transform.localScale.x), coll.offset.y);
 
-        // check wall touching
+        // check wall touching (X axis)
         touchLeftWall = Physics2D.OverlapCircle((Vector2)transform.position + new Vector2(leftOffset.x, leftOffset.y), checkRadius, groundLayer);
         touchRightWall = Physics2D.OverlapCircle((Vector2)transform.position + new Vector2(rightOffset.x, rightOffset.y), checkRadius, groundLayer);
+
+        // onWall?
+        if(isPlayer)
+        onWall = (touchLeftWall && playerController.inputDirection.x < 0f || touchRightWall && playerController.inputDirection.x > 0f) && rb.velocity.y < 0f;
     }
 
     // to visualize the isGround check radius

@@ -27,6 +27,9 @@ public class UIManager : MonoBehaviour
     {
         var percentage = (character.currentHealth / character.maxHealth);
         playerStatBar.OnHealthChange((float)percentage);
+    
+        playerStatBar.OnPowerChange(character);
+    
     }
 
 
